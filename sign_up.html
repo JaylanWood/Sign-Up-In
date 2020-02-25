@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>注册</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .form-wrapper {
+      padding: 20px;
+      border: 1px solid #ddd;
+      min-width: 350px;
+      border-radius: 5px;
+    }
+
+    .form-wrapper .row {
+      margin: 10px 0;
+    }
+
+    .form-wrapper .row>label {
+      display: inline-block;
+      min-width: 4em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="form-wrapper">
+    <h1>注册</h1>
+    <form id="signUpForm">
+      <div class="row">
+        <label>邮箱</label>
+        <input type="text" name="email" placeholder='example@gmail.com'>
+        <span class="error"></span>
+      </div>
+      <div class="row">
+        <label>密码</label>
+        <input type="password" name="password">
+        <span class="error"></span>
+      </div>
+      <div class="row">
+        <label>确认密码</label>
+        <input type="password" name="password_confirmation">
+        <span class="error"></span>
+      </div>
+      <div class="row">
+        <input type="submit" value="注册">
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script>
+    let $form = $('#signUpForm')
+    $form.on('submit', (e) => {
+      // 取消默认提交
+      e.preventDefault()
+      // 把提交内容合成一个hash对象
+      let hash = {}
+      let need = ['email', 'password', 'password_confirmation']
+      need.forEach((name) => {
+        let value = $form.find(`[name=${name}]`).val()
+        hash[name] = value
+      })
+      console.log(hash)
+      // 清空提示
+      $form.find('.error').each((index, span) => {
+        $(span).text('')
+      })
+      // 表单填写提示
+      if (hash['email'] === '') {
+        $form.find('[name="email"]').siblings('.error')
+          .text('填邮箱呀同学')
+        return
+      }
+      if (hash['password'] === '') {
+        $form.find('[name="password"]').siblings('.error')
+          .text('填密码呀同学')
+        return
+      }
+      if (hash['password_confirmation'] === '') {
+        $form.find('[name="password_confirmation"]').siblings('.error')
+          .text('确认密码呀同学')
+        return
+      }
+      if (hash['password'] !== hash['password_confirmation']) {
+        $form.find('[name="password_confirmation"]').siblings('.error')
+          .text('密码不匹配')
+        return
+      }
+      // 提交请求
+      $.post('/sign_up', hash)
+        .then((response) => {
+          // 响应成功处理
+          console.log(response)
+          alert('注册成功！')
+          window.location.href = '/sign_in'
+        }, (request) => {
+          // 响应失败处理
+          let {
+            errors
+          } = request.responseJSON
+          if (errors.email && errors.email === 'invalid') {
+            console.log(errors)
+            $form.find('[name="email"]').siblings('.error')
+              .text('邮箱格式错误')
+          }
+        })
+    })
+  </script>
+</body>
+
+</html>
